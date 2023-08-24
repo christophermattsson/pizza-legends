@@ -20,17 +20,32 @@ class Sprite {
         }
 
         // Configuring animation & initial state
-        this.animations = config.antimations || {
+        // based of sprite sheet that is 4x4 of squares of 16. 
+        // meaning that [1,0] is second column on first row
+        // [2,3] is third column of forth row and so on
+        this.animations = config.animations || {
+            // down
             "idle-down": [ [0,0] ],
             "walk-down": [ [1,0],[2,0],[3,0],[0,0] ],
+            // right
+            "idle-right": [ [0,1] ],
+            "walk-right": [ [1,1],[2,1],[3,1],[0,1] ],
+            // up
+            "idle-up": [ [0,2] ],
+            "walk-up": [ [1,2],[2,2],[3,2],[0,2] ],
+            // left
+            "idle-left": [ [0,3] ],
+            "walk-left": [ [1,3],[2,3],[3,3],[0,3] ],
         }
 
         this.currentAnimation = config.currentAnimation || "walk-down";
         this.currentAnimationFrame = 0; 
 
-        // Speed/length of animation
-        this.antimationFrameLimit = config.animationFrameLimit || 8;
-        this.antimationFrameProgress = this.antimationFrameLimit;
+        // Speed/length of animation - aka how long we want to show
+        // for example this.animations["walk-down"][2] (continue below)
+        this.animationFrameLimit = config.animationFrameLimit || 8;
+        // ... and this is at 0 we want to move on to this.animations["walk-down"][3]
+        this.animationFrameProgress = this.animationFrameLimit;
 
         // Reference the game object
         this.gameObject = config.gameObject;
@@ -38,6 +53,14 @@ class Sprite {
 
     get frame() {
         return this.animations[this.currentAnimation][this.currentAnimationFrame];
+    }
+
+    setAnimation(key) {
+        if (this.currentAnimation !== key) {
+            this.currentAnimation = key;
+            this.currentAnimationFrame = 0;
+            this.animationFrameProgress = this.animationFrameLimit;
+        }
     }
 
     updateAnimationProgress() {
@@ -51,11 +74,12 @@ class Sprite {
         this.animationFrameProgress = this.animationFrameLimit;
         this.currentAnimationFrame += 1;
 
+        // if animation for exmaple has only 4 different frames
+        // we dont want to present a 5th one. So if this.frame === undefined
+        // we resent the currentAnimationFrame
         if (this.frame === undefined) {
             this.currentAnimationFrame = 0
         }
-
-
     }
 
     draw(ctx) {
@@ -66,7 +90,8 @@ class Sprite {
 
         this.isShadowLoaded && ctx.drawImage(this.shadow, x, y)
 
-        const [frameX, frameY] = this.frame;
+        const frameX = this.frame[0];
+        const frameY = this.frame[1];
 
         this.isLoaded && ctx.drawImage(this.image,
             frameX * 32,frameY * 32,
