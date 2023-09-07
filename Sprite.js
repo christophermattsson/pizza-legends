@@ -38,12 +38,12 @@ class Sprite {
             "walk-left": [ [1,3],[2,3],[3,3],[0,3] ],
         }
 
-        this.currentAnimation = config.currentAnimation || "walk-down";
+        this.currentAnimation = config.currentAnimation || "idle-down";
         this.currentAnimationFrame = 0; 
 
         // Speed/length of animation - aka how long we want to show
         // for example this.animations["walk-down"][2] (continue below)
-        this.animationFrameLimit = config.animationFrameLimit || 8;
+        this.animationFrameLimit = config.animationFrameLimit || 6;
         // ... and this is at 0 we want to move on to this.animations["walk-down"][3]
         this.animationFrameProgress = this.animationFrameLimit;
 
@@ -82,11 +82,15 @@ class Sprite {
         }
     }
 
-    draw(ctx) {
+    draw(ctx, cameraObject) {
         // Sprite sheets goes 16 by 16 and/or 32 by 32 hence the numbers below
-        // -8 and -18 is just to make it more fancy
-        const x = this.gameObject.x - 8;
-        const y = this.gameObject.y - 18;
+        // -8 and -18 we write to place objects correct in the world, because of how we
+        // cut out the sprites form the sprite sheet.
+        // utils.withGrid((10.5) - cameraObject.x) this we use to have the main character
+        // centered on the screen. The gameArea is 22 x 12, so to place the caracter in the middle
+        // these are the numbers we end up with
+        const x = this.gameObject.x - 8 + utils.withGrid(10.5) - cameraObject.x;
+        const y = this.gameObject.y - 18 + utils.withGrid(6) - cameraObject.y;
 
         this.isShadowLoaded && ctx.drawImage(this.shadow, x, y)
 

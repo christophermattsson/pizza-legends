@@ -10,21 +10,31 @@ class Overworld {
 		const step = () => {
 			// Clear the canvas
 			this.ctx.clearRect(0,0,this.canvas.width, this.canvas.height);
-			
-			// Draw Lower Layer
-			this.map.drawLowerImage(this.ctx)
-			
-			// Draw Game Objects
+
+			// Object that the "camera" will follow
+			const cameraObject = this.map.gameObjects.hero;
+
+			// Update all objects before we draw them
+			// This is to prevent wonkyness when drawing multiple layers and objects
 			Object.values(this.map.gameObjects).forEach(object => {
 				// update is a function declared on the GameObject class
 				object.update({
 					arrow: this.directionInput.direction,
+					map: this.map,
 				});
-				object.sprite.draw(this.ctx);
+			})
+			
+			// Draw Lower Layer
+			this.map.drawLowerImage(this.ctx, cameraObject)
+			
+			// Draw Game Objects
+			Object.values(this.map.gameObjects).forEach(object => {
+				object.sprite.draw(this.ctx, cameraObject);
 			})
 			
 			// Draw Upper Layer
-			this.map.drawUpperImage(this.ctx)
+			this.map.drawUpperImage(this.ctx, cameraObject)
+
 			requestAnimationFrame(() => {
 				step();
 			})
@@ -34,6 +44,7 @@ class Overworld {
 
 	init() {
 		this.map = new OverworldMap(window.OverworldMaps.DemoRoom);
+		console.log(this.map.walls);
 		this.directionInput = new DirectionUpdate();
 		this.directionInput.init();
 
